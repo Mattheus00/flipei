@@ -63,34 +63,62 @@ export default function Dashboard() {
                     .from('cards')
                     .select('id', { count: 'exact', head: true })
 
-                // Fetch today's study logs
-                const todayStart = new Date()
-                todayStart.setHours(0, 0, 0, 0)
-                const { data: logsToday, error: logsTodayErr } = await supabase
-                    .from('study_logs')
-                    .select('correct')
-                    .gte('studied_at', todayStart.toISOString())
+                // Fetch study logs (gracefully handle if table doesn't exist)
+                let revisionsToday = 0
+                let accuracy = 0
 
-                console.log('[Dashboard] logsToday:', logsToday, 'error:', logsTodayErr)
+                try {
+                    const todayStart = new Date()
+                    todayStart.setHours(0, 0, 0, 0)
+                    const { data: logsToday } = await supabase
+                        .from('study_logs')
+                        .select('correct')
+                        .gte('studied_at', todayStart.toISOString())
 
-                // Fetch all-time logs for accuracy
-                const { data: allLogs, error: allLogsErr } = await supabase
-                    .from('study_logs')
-                    .select('correct')
+                    const { data: allLogs } = await supabase
+                        .from('study_logs')
+                        .select('correct')
 
-                console.log('[Dashboard] allLogs:', allLogs, 'error:', allLogsErr)
+                    revisionsToday = logsToday?.length || 0
+                    const totalLogs = allLogs?.length || 0
+                    const correctLogs = allLogs?.filter(l => l.correct).length || 0
+                    accuracy = totalLogs > 0 ? Math.round((correctLogs / totalLogs) * 100) : 0
+                } catch { /* study_logs may not exist yet */ }
 
-                const revisionsToday = logsToday?.length || 0
-                const totalLogs = allLogs?.length || 0
-                const correctLogs = allLogs?.filter(l => l.correct).length || 0
-                const accuracy = totalLogs > 0 ? Math.round((correctLogs / totalLogs) * 100) : 0
+                // Count unique study days as streak
+                let streak = 0
+                try {
+                    const { data: streakLogs } = await supabase
+                        .from('study_logs')
+                        .select('studied_at')
 
-                console.log('[Dashboard] stats:', { revisionsToday, totalLogs, correctLogs, accuracy })
+                    if (streakLogs && streakLogs.length > 0) {
+                        const uniqueDays = [...new Set(streakLogs.map(l => new Date(l.studied_at).toDateString()))]
+                            .map(d => new Date(d))
+                            .sort((a, b) => b.getTime() - a.getTime())
+
+                        // Count consecutive days from today
+                        const today = new Date()
+                        today.setHours(0, 0, 0, 0)
+                        for (let i = 0; i < uniqueDays.length; i++) {
+                            const expected = new Date(today)
+                            expected.setDate(expected.getDate() - i)
+                            expected.setHours(0, 0, 0, 0)
+                            const dayDate = new Date(uniqueDays[i])
+                            dayDate.setHours(0, 0, 0, 0)
+                            if (dayDate.getTime() === expected.getTime()) {
+                                streak++
+                            } else {
+                                break
+                            }
+                        }
+                    }
+                } catch { /* ignore */ }
 
                 setStats({
                     cardsGenerated: cardCount || 0,
                     revisionsToday,
-                    streak: 0,
+                    streak,
                     accuracy
                 })
 
