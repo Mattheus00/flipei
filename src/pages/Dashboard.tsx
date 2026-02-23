@@ -66,12 +66,12 @@ export default function Dashboard() {
                     setStats(prev => ({ ...prev, cardsGenerated: count || 0 }))
                 }
 
-                // Mocking other stats for now as they require a complex study_history table
+                // Reset other stats to 0 until history/logic is implemented
                 setStats(prev => ({
                     ...prev,
-                    revisionsToday: 12, // Mock 
-                    streak: 5, // Mock
-                    accuracy: 85 // Mock
+                    revisionsToday: 0,
+                    streak: 0,
+                    accuracy: 0
                 }))
 
             } catch (err) {
