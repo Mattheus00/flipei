@@ -209,14 +209,16 @@ export default function Decks() {
                     <div className="relative bg-[#0D1829] border-2 border-white/5 w-full max-w-lg rounded-[3.5rem] p-10 shadow-2xl overflow-hidden scale-up">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-[#1A6BFF]/10 blur-3xl rounded-full"></div>
 
+                        <button
+                            onClick={() => setIsCreateModalOpen(false)}
+                            className="absolute top-8 right-8 z-[110] text-gray-500 hover:text-white hover:bg-white/10 p-3 rounded-2xl transition-all"
+                            type="button"
+                        >
+                            <X className="h-6 w-6" />
+                        </button>
+
                         <div className="flex items-center justify-between mb-8">
                             <h2 className="text-2xl font-syne font-bold italic uppercase tracking-tight">Criar novo Deck</h2>
-                            <button
-                                onClick={() => setIsCreateModalOpen(false)}
-                                className="text-gray-500 hover:text-white hover:bg-white/5 p-2 rounded-xl transition-all -mr-2"
-                            >
-                                <X className="h-6 w-6" />
-                            </button>
                         </div>
 
                         <form onSubmit={handleCreateDeck} className="space-y-8">
