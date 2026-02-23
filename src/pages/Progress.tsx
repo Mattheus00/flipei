@@ -1,30 +1,93 @@
-
-
+import { useEffect, useState } from 'react'
 import {
     CheckCircle2,
     Clock,
     Brain,
     History,
-    ChevronRight
+    ChevronRight,
+    Loader2
 } from 'lucide-react'
+import { supabase } from '../lib/supabase'
+import { useAuth } from '../contexts/AuthContext'
 
 export default function Progress() {
+    const { user } = useAuth()
+    const [loading, setLoading] = useState(true)
+    const [statsData, setStatsData] = useState({
+        totalDecks: 0,
+        totalCards: 0,
+        retention: 0,
+        sessions: 0
+    })
+
+    useEffect(() => {
+        async function fetchStats() {
+            if (!user) return
+
+            try {
+                // 1. Buscar total de Decks
+                const { count: decksCount } = await supabase
+                    .from('decks')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('user_id', user.id)
+
+                // 2. Buscar total de Cards
+                const { data: userDecks } = await supabase
+                    .from('decks')
+                    .select('id')
+                    .eq('user_id', user.id)
+
+                let cardsCount = 0
+                if (userDecks && userDecks.length > 0) {
+                    const deckIds = userDecks.map(d => d.id)
+                    const { count: cCount } = await supabase
+                        .from('cards')
+                        .select('*', { count: 'exact', head: true })
+                        .in('deck_id', deckIds)
+                    cardsCount = cCount || 0
+                }
+
+                setStatsData({
+                    totalDecks: decksCount || 0,
+                    totalCards: cardsCount,
+                    retention: 0, // Placeholder até implementar lógica de estudo
+                    sessions: 0   // Placeholder até implementar histórico
+                })
+            } catch (error) {
+                console.error('Erro ao buscar estatísticas:', error)
+            } finally {
+                setLoading(false)
+            }
+        }
+
+        fetchStats()
+    }, [user])
+
     const stats = [
-        { label: 'Tempo Total', value: '42h 15m', icon: Clock, color: '#1A6BFF' },
-        { label: 'Retenção', value: '84%', icon: Brain, color: '#00E5A0' },
-        { label: 'Sessões', value: '156', icon: CheckCircle2, color: '#FFD600' },
-        { label: 'Cards Salvos', value: '892', icon: History, color: '#00D4FF' },
+        { label: 'Decks Criados', value: statsData.totalDecks.toString(), icon: Clock, color: '#1A6BFF' },
+        { label: 'Retenção', value: `${statsData.retention}%`, icon: Brain, color: '#00E5A0' },
+        { label: 'Sessões', value: statsData.sessions.toString(), icon: CheckCircle2, color: '#FFD600' },
+        { label: 'Cards Salvos', value: statsData.totalCards.toString(), icon: History, color: '#00D4FF' },
     ]
 
     const weekProgress = [
-        { day: 'Seg', hours: 2.5 },
-        { day: 'Ter', hours: 4.0 },
-        { day: 'Qua', hours: 3.2 },
-        { day: 'Qui', hours: 1.5 },
-        { day: 'Sex', hours: 5.0 },
-        { day: 'Sáb', hours: 2.0 },
+        { day: 'Seg', hours: 0 },
+        { day: 'Ter', hours: 0 },
+        { day: 'Qua', hours: 0 },
+        { day: 'Qui', hours: 0 },
+        { day: 'Sex', hours: 0 },
+        { day: 'Sáb', hours: 0 },
         { day: 'Dom', hours: 0 },
     ]
+
+    if (loading) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
+                <Loader2 className="h-8 w-8 animate-spin text-[#1A6BFF]" />
+                <p className="text-gray-400 font-medium">Carregando seus dados...</p>
+            </div>
+        )
+    }
 
     return (
         <div className="space-y-10 animate-fade-in font-dm text-white">
@@ -32,10 +95,6 @@ export default function Progress() {
                 <div>
                     <h1 className="text-3xl font-syne font-bold uppercase italic tracking-tighter">Meu Progresso</h1>
                     <p className="text-gray-400 mt-1 font-medium">Veja sua evolução e absorção de conteúdo.</p>
-                </div>
-                <div className="flex bg-[#0D1829] border-2 border-white/5 p-1 rounded-2xl">
-                    <button className="bg-[#111F35] px-4 py-2 rounded-xl font-black text-[10px] uppercase tracking-widest text-white shadow-sm">7 dias</button>
-                    <button className="px-4 py-2 rounded-xl font-black text-[10px] uppercase tracking-widest text-gray-600 hover:text-gray-400 transition-all">30 dias</button>
                 </div>
             </header>
 
@@ -71,16 +130,17 @@ export default function Progress() {
                                 <div className="relative w-full flex flex-col items-center">
                                     <div
                                         className="w-full max-w-[42px] bg-gradient-to-t from-[#1A6BFF]/40 to-[#1A6BFF] rounded-t-2xl transition-all group-hover:shadow-[0_0_30px_rgba(26,107,255,0.4)] relative"
-                                        style={{ height: `${(item.hours / 5) * 100}%`, minHeight: item.hours > 0 ? '4px' : '0' }}
+                                        style={{ height: `${(item.hours / 5) * 100}%`, minHeight: '1px' }}
                                     >
-                                        <div className="absolute -top-10 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 bg-white text-[#1A6BFF] px-2 py-1 rounded-lg text-[10px] font-black transition-all shadow-xl pointer-events-none">
-                                            {item.hours}h
-                                        </div>
                                     </div>
                                 </div>
                                 <span className="text-[10px] font-black text-gray-700 uppercase tracking-tighter">{item.day}</span>
                             </div>
                         ))}
+                    </div>
+
+                    <div className="mt-8 p-6 bg-white/5 rounded-2xl border border-white/5 text-center">
+                        <p className="text-sm text-gray-400 font-medium italic">Comece a estudar hoje para ver seu gráfico crescer!</p>
                     </div>
                 </div>
 
@@ -88,27 +148,31 @@ export default function Progress() {
                 <div className="bg-[#0D1829] border-2 border-white/5 rounded-[3rem] p-10 flex flex-col relative overflow-hidden">
                     <h3 className="text-xl font-syne font-bold mb-10 italic uppercase tracking-tight">Domínio</h3>
 
-                    <div className="space-y-8 flex-1">
-                        {[
-                            { name: 'Natureza', perc: 85, color: '#00E5A0' },
-                            { name: 'Humanas', perc: 62, color: '#FFD600' },
-                            { name: 'Linguagens', perc: 92, color: '#1A6BFF' },
-                            { name: 'Matemática', perc: 41, color: '#FF6B6B' },
-                        ].map((area) => (
-                            <div key={area.name} className="space-y-3">
-                                <div className="flex justify-between text-[10px] font-black text-gray-600 uppercase tracking-widest px-1">
-                                    <span>{area.name}</span>
-                                    <span style={{ color: area.color }}>{area.perc}%</span>
+                    {statsData.totalDecks === 0 ? (
+                        <div className="flex-1 flex flex-col items-center justify-center text-center space-y-4">
+                            <Brain className="h-12 w-12 text-gray-700" />
+                            <p className="text-xs text-gray-500 font-bold uppercase tracking-widest">Ainda não há dados<br />para analisar</p>
+                        </div>
+                    ) : (
+                        <div className="space-y-8 flex-1">
+                            {[
+                                { name: 'Geral', perc: 0, color: '#1A6BFF' },
+                            ].map((area) => (
+                                <div key={area.name} className="space-y-3">
+                                    <div className="flex justify-between text-[10px] font-black text-gray-600 uppercase tracking-widest px-1">
+                                        <span>{area.name}</span>
+                                        <span style={{ color: area.color }}>{area.perc}%</span>
+                                    </div>
+                                    <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
+                                        <div
+                                            className="h-full rounded-full"
+                                            style={{ width: `${area.perc}%`, backgroundColor: area.color }}
+                                        ></div>
+                                    </div>
                                 </div>
-                                <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
-                                    <div
-                                        className="h-full rounded-full"
-                                        style={{ width: `${area.perc}%`, backgroundColor: area.color }}
-                                    ></div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
+                            ))}
+                        </div>
+                    )}
 
                     <button className="mt-12 w-full py-4 bg-white/5 border border-white/5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 hover:text-white hover:bg-white/10 transition-all flex items-center justify-center gap-2 active:scale-95">
                         Relatório Geral <ChevronRight className="h-4 w-4" />

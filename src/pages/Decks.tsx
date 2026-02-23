@@ -211,7 +211,12 @@ export default function Decks() {
 
                         <div className="flex items-center justify-between mb-8">
                             <h2 className="text-2xl font-syne font-bold italic uppercase tracking-tight">Criar novo Deck</h2>
-                            <button onClick={() => setIsCreateModalOpen(false)} className="text-gray-500 hover:text-white"><X /></button>
+                            <button
+                                onClick={() => setIsCreateModalOpen(false)}
+                                className="text-gray-500 hover:text-white hover:bg-white/5 p-2 rounded-xl transition-all -mr-2"
+                            >
+                                <X className="h-6 w-6" />
+                            </button>
                         </div>
 
                         <form onSubmit={handleCreateDeck} className="space-y-8">

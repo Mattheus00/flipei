@@ -120,7 +120,10 @@ export default function Layout({ children }: LayoutProps) {
                         </div>
 
                         <div className="flex items-center gap-4">
-                            <button className="p-2.5 rounded-xl bg-white/5 text-gray-400 hover:text-white transition-colors relative group">
+                            <button
+                                onClick={() => alert('Feature em desenvolvimento: Em breve você receberá notificações sobre seus estudos!')}
+                                className="p-2.5 rounded-xl bg-white/5 text-gray-400 hover:text-white transition-colors relative group"
+                            >
                                 <Bell className="h-5 w-5 group-hover:scale-110 transition-transform" />
                                 <span className="absolute top-2.5 right-2.5 h-2 w-2 bg-[#FF6B6B] rounded-full border-2 border-[#080F1E]"></span>
                             </button>
@@ -144,7 +147,9 @@ export default function Layout({ children }: LayoutProps) {
                                 <span className="text-2xl font-bold font-syne tracking-tight">
                                     🃏 Flip<span className="text-[#00D4FF]">ei</span>
                                 </span>
-                                <button onClick={() => setIsMobileMenuOpen(false)} className="text-gray-500"><X /></button>
+                                <button onClick={() => setIsMobileMenuOpen(false)} className="text-gray-500 hover:text-white p-2 -mr-2 transition-colors">
+                                    <X className="h-6 w-6" />
+                                </button>
                             </div>
 
                             <div className="flex-1 space-y-4">
