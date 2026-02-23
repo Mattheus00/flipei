@@ -11,6 +11,7 @@ export default function Cadastro() {
     const [formData, setFormData] = React.useState({ nome: '', email: '', password: '' })
 
     const [loading, setLoading] = React.useState(false)
+    const [googleLoading, setGoogleLoading] = React.useState(false)
     const [error, setError] = React.useState<string | null>(null)
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -54,6 +55,22 @@ export default function Cadastro() {
         }
     }
 
+    const handleGoogleLogin = async () => {
+        setGoogleLoading(true)
+        setError(null)
+        try {
+            const { error: authError } = await supabase.auth.signInWithOAuth({
+                provider: 'google',
+                options: {
+                    redirectTo: `${window.location.origin}/dashboard`,
+                },
+            })
+            if (authError) throw authError
+        } catch (err: any) {
+            setError(err.message || 'Erro ao entrar com Google.')
+            setGoogleLoading(false)
+        }
+    }
 
     return (
         <div className="min-h-screen bg-[#080F1E] flex flex-col md:flex-row font-dm text-white">
@@ -181,9 +198,17 @@ export default function Cadastro() {
                             <div className="relative flex justify-center text-[10px] uppercase font-black"><span className="bg-[#080F1E] px-4 text-gray-600 tracking-[0.2em]">Ou crie com</span></div>
                         </div>
 
-                        <button className="w-full bg-white text-gray-900 py-4 rounded-2xl font-bold flex items-center justify-center gap-3 hover:bg-gray-100 transition-all active:scale-95 shadow-sm">
-                            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" className="w-5 h-5" alt="Google" />
-                            Cadastrar com Google
+                        <button
+                            onClick={handleGoogleLogin}
+                            disabled={googleLoading}
+                            className="w-full bg-white text-gray-900 py-4 rounded-2xl font-bold flex items-center justify-center gap-3 hover:bg-gray-100 transition-all active:scale-95 shadow-sm disabled:opacity-50"
+                        >
+                            {googleLoading ? (
+                                <Loader2 className="h-5 w-5 animate-spin text-gray-500" />
+                            ) : (
+                                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" className="w-5 h-5" alt="Google" />
+                            )}
+                            {googleLoading ? 'Redirecionando...' : 'Cadastrar com Google'}
                         </button>
 
                         <div className="mt-10 text-center">
