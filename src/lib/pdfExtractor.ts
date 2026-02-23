@@ -1,8 +1,11 @@
 import * as pdfjsLib from 'pdfjs-dist'
+// Importar o worker diretamente do node_modules via Vite (sem CDN externo)
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+import PdfWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url'
 
-// Configurar o worker do PDF.js para rodar no browser
-// Using a CDN worker to avoid bundling issues with Vite
-pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`
+// Apontar o worker para o arquivo local (resolvido pelo Vite no build)
+pdfjsLib.GlobalWorkerOptions.workerSrc = PdfWorker
 
 export async function extractTextFromPDF(file: File): Promise<string> {
     const arrayBuffer = await file.arrayBuffer()
@@ -17,7 +20,6 @@ export async function extractTextFromPDF(file: File): Promise<string> {
         const page = await pdf.getPage(pageNum)
         const textContent = await page.getTextContent()
 
-        // Concatenar todos os itens de texto da página
         const pageText = textContent.items
             .map((item: any) => item.str || '')
             .join(' ')
