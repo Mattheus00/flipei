@@ -305,10 +305,10 @@ export default function Generate() {
                                     onDrop={handleDrop}
                                     onClick={() => fileInputRef.current?.click()}
                                     className={`border-2 border-dashed rounded-3xl p-12 text-center cursor-pointer transition-all ${isDragging
-                                            ? 'border-[#1A6BFF] bg-[#1A6BFF]/10 scale-[1.02]'
-                                            : pdfFile
-                                                ? 'border-[#00E5A0]/60 bg-[#00E5A0]/5'
-                                                : 'border-white/10 hover:border-[#1A6BFF]/40 hover:bg-[#1A6BFF]/5'
+                                        ? 'border-[#1A6BFF] bg-[#1A6BFF]/10 scale-[1.02]'
+                                        : pdfFile
+                                            ? 'border-[#00E5A0]/60 bg-[#00E5A0]/5'
+                                            : 'border-white/10 hover:border-[#1A6BFF]/40 hover:bg-[#1A6BFF]/5'
                                         }`}
                                 >
                                     <input
@@ -445,7 +445,7 @@ export default function Generate() {
                                 <label className="text-[10px] font-black text-gray-700 uppercase tracking-widest px-1">Modelo</label>
                                 <div className="bg-[#111F35] border-2 border-white/5 p-4 rounded-xl flex items-center gap-3">
                                     <div className="w-2 h-2 bg-[#00E5A0] rounded-full animate-pulse"></div>
-                                    <span className="text-xs font-black text-white">Llama 3 8B (Groq)</span>
+                                    <span className="text-xs font-black text-white">Llama 3.1 8B (Groq)</span>
                                 </div>
                             </div>
                         </div>
