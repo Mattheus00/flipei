@@ -58,20 +58,34 @@ export default function Dashboard() {
                     color: d.color
                 })))
 
-                // Fetch total cards count for stats
-                // We use a join check or just trust RLS, but let's be more explicit
-                const { count, error: countError } = await supabase
+                // Fetch total cards count
+                const { count: cardCount } = await supabase
                     .from('cards')
                     .select('id', { count: 'exact', head: true })
 
-                if (countError) console.error('Erro na contagem de cards:', countError)
+                // Fetch today's study logs
+                const todayStart = new Date()
+                todayStart.setHours(0, 0, 0, 0)
+                const { data: logsToday } = await supabase
+                    .from('study_logs')
+                    .select('correct')
+                    .gte('studied_at', todayStart.toISOString())
 
-                // Update all stats at once to avoid state race conditions
+                // Fetch all-time logs for accuracy
+                const { data: allLogs } = await supabase
+                    .from('study_logs')
+                    .select('correct')
+
+                const revisionsToday = logsToday?.length || 0
+                const totalLogs = allLogs?.length || 0
+                const correctLogs = allLogs?.filter(l => l.correct).length || 0
+                const accuracy = totalLogs > 0 ? Math.round((correctLogs / totalLogs) * 100) : 0
+
                 setStats({
-                    cardsGenerated: count || 0,
-                    revisionsToday: 0,
+                    cardsGenerated: cardCount || 0,
+                    revisionsToday,
                     streak: 0,
-                    accuracy: 0
+                    accuracy
                 })
 
             } catch (err) {
