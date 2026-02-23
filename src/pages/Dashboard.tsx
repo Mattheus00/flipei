@@ -59,21 +59,20 @@ export default function Dashboard() {
                 })))
 
                 // Fetch total cards count for stats
+                // We use a join check or just trust RLS, but let's be more explicit
                 const { count, error: countError } = await supabase
                     .from('cards')
-                    .select('*', { count: 'exact', head: true })
+                    .select('id', { count: 'exact', head: true })
 
-                if (!countError) {
-                    setStats(prev => ({ ...prev, cardsGenerated: count || 0 }))
-                }
+                if (countError) console.error('Erro na contagem de cards:', countError)
 
-                // Reset other stats to 0 until history/logic is implemented
-                setStats(prev => ({
-                    ...prev,
+                // Update all stats at once to avoid state race conditions
+                setStats({
+                    cardsGenerated: count || 0,
                     revisionsToday: 0,
                     streak: 0,
                     accuracy: 0
-                }))
+                })
 
             } catch (err) {
                 console.error('Erro ao carregar dashboard:', err)
