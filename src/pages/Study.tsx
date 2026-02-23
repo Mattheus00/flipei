@@ -64,14 +64,19 @@ export default function Study() {
         if (isCorrect) setCorrect(c => c + 1)
         else setWrong(w => w + 1)
 
-        // Log silently - ignore errors if table doesn't exist yet
+        // Log study result
         if (user) {
-            supabase.from('study_logs').insert([{
+            const payload = {
                 user_id: user.id,
                 deck_id: id,
                 card_id: cards[currentIndex].id,
                 correct: isCorrect,
-            }]).then(() => { })
+            }
+            console.log('[Study] Saving log:', payload)
+            supabase.from('study_logs').insert([payload]).then(({ error }) => {
+                if (error) console.error('[Study] Failed to save log:', error)
+                else console.log('[Study] Log saved successfully!')
+            })
         }
     }
 
@@ -258,8 +263,8 @@ export default function Study() {
                                     className={`${cls} rounded-2xl p-4 text-left text-sm leading-snug transition-all flex items-center gap-3`}
                                 >
                                     <span className={`shrink-0 w-7 h-7 rounded-lg flex items-center justify-center font-black text-[11px] border transition-all ${answered && isCorrectAnswer ? 'bg-[#00E5A0] border-[#00E5A0] text-[#080F1E]'
-                                            : answered && isSelected ? 'bg-[#FF6B6B] border-[#FF6B6B] text-white'
-                                                : 'bg-white/5 border-white/10 text-gray-500'
+                                        : answered && isSelected ? 'bg-[#FF6B6B] border-[#FF6B6B] text-white'
+                                            : 'bg-white/5 border-white/10 text-gray-500'
                                         }`}>
                                         {['A', 'B', 'C', 'D'][idx]}
                                     </span>

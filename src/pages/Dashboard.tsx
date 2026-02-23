@@ -66,20 +66,26 @@ export default function Dashboard() {
                 // Fetch today's study logs
                 const todayStart = new Date()
                 todayStart.setHours(0, 0, 0, 0)
-                const { data: logsToday } = await supabase
+                const { data: logsToday, error: logsTodayErr } = await supabase
                     .from('study_logs')
                     .select('correct')
                     .gte('studied_at', todayStart.toISOString())
 
+                console.log('[Dashboard] logsToday:', logsToday, 'error:', logsTodayErr)
+
                 // Fetch all-time logs for accuracy
-                const { data: allLogs } = await supabase
+                const { data: allLogs, error: allLogsErr } = await supabase
                     .from('study_logs')
                     .select('correct')
+
+                console.log('[Dashboard] allLogs:', allLogs, 'error:', allLogsErr)
 
                 const revisionsToday = logsToday?.length || 0
                 const totalLogs = allLogs?.length || 0
                 const correctLogs = allLogs?.filter(l => l.correct).length || 0
                 const accuracy = totalLogs > 0 ? Math.round((correctLogs / totalLogs) * 100) : 0
+
+                console.log('[Dashboard] stats:', { revisionsToday, totalLogs, correctLogs, accuracy })
 
                 setStats({
                     cardsGenerated: cardCount || 0,
