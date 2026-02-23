@@ -1,7 +1,8 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL?.trim()
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY?.trim()
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL?.replace(/\s/g, '')
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY?.replace(/\s/g, '')
+
 
 
 // Validação básica para evitar crash com placeholders
@@ -20,7 +21,10 @@ if (!supabaseUrl || !supabaseAnonKey || !isValidUrl(supabaseUrl)) {
     } else {
         console.error('❌ Supabase URL inválida no .env:', supabaseUrl)
     }
+} else {
+    console.log('✅ Supabase configurado:', supabaseUrl.substring(0, 15) + '...', '| Key:', supabaseAnonKey.substring(0, 10) + '...')
 }
+
 
 export const supabase = createClient(
     isValidUrl(supabaseUrl) ? supabaseUrl : 'https://placeholder-url.supabase.co',
