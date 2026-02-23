@@ -20,6 +20,8 @@ export default function Generate() {
     const [method, setMethod] = useState('upload')
     const [isGenerating, setIsGenerating] = useState(false)
     const [title, setTitle] = useState('')
+    const [density, setDensity] = useState(15)
+    const [language, setLanguage] = useState('PT-BR')
 
     const handleGenerate = async () => {
         if (!title) {
@@ -213,16 +215,33 @@ export default function Generate() {
 
                             <div className="space-y-3">
                                 <label className="text-[10px] font-black text-gray-700 uppercase tracking-widest flex justify-between px-1">
-                                    Densidade <span>~15 cards</span>
+                                    Densidade <span>~{density} cards</span>
                                 </label>
-                                <input type="range" className="w-full accent-[#1A6BFF] h-1.5 bg-white/5 rounded-lg appearance-none cursor-pointer" />
+                                <input
+                                    type="range"
+                                    min="5"
+                                    max="50"
+                                    value={density}
+                                    onChange={(e) => setDensity(parseInt(e.target.value))}
+                                    className="w-full accent-[#1A6BFF] h-1.5 bg-white/5 rounded-lg appearance-none cursor-pointer"
+                                />
                             </div>
 
                             <div className="space-y-3">
                                 <label className="text-[10px] font-black text-gray-700 uppercase tracking-widest px-1">Idioma</label>
                                 <div className="grid grid-cols-2 gap-2">
-                                    <button className="bg-[#1A6BFF] p-3 rounded-xl text-[10px] font-black uppercase">PT-BR</button>
-                                    <button className="bg-white/5 p-3 rounded-xl text-[10px] font-black uppercase text-gray-500">EN-US</button>
+                                    <button
+                                        onClick={() => setLanguage('PT-BR')}
+                                        className={`p-3 rounded-xl text-[10px] font-black uppercase transition-all ${language === 'PT-BR' ? 'bg-[#1A6BFF] text-white shadow-lg' : 'bg-white/5 text-gray-500 hover:text-white'}`}
+                                    >
+                                        PT-BR
+                                    </button>
+                                    <button
+                                        onClick={() => setLanguage('EN-US')}
+                                        className={`p-3 rounded-xl text-[10px] font-black uppercase transition-all ${language === 'EN-US' ? 'bg-[#1A6BFF] text-white shadow-lg' : 'bg-white/5 text-gray-500 hover:text-white'}`}
+                                    >
+                                        EN-US
+                                    </button>
                                 </div>
                             </div>
                         </div>

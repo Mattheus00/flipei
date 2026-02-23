@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-import { Plus, Search, Filter, MoreVertical, LayoutGrid, List as ListIcon, Layers, Loader2, X } from 'lucide-react'
+import { Plus, Search, Filter, Trash2, LayoutGrid, List as ListIcon, Layers, Loader2, X } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
@@ -89,6 +89,24 @@ export default function Decks() {
         }
     }
 
+    const handleDeleteDeck = async (id: string) => {
+        if (!confirm('Tem certeza que deseja excluir este deck? Todos os cards dentro dele serão apagados para sempre.')) return
+
+        try {
+            const { error } = await supabase
+                .from('decks')
+                .delete()
+                .eq('id', id)
+
+            if (error) throw error
+
+            setDecks(decks.filter(d => d.id !== id))
+        } catch (err) {
+            console.error('Erro ao deletar deck:', err)
+            alert('Não foi possível excluir o deck. Tente novamente.')
+        }
+    }
+
     if (loading && decks.length === 0) {
         return (
             <div className="min-h-[60vh] flex flex-col items-center justify-center animate-fade-in">
@@ -147,7 +165,13 @@ export default function Decks() {
                         <div className="p-8">
                             <div className="flex items-start justify-between mb-6">
                                 <div className="text-5xl drop-shadow-2xl">{deck.emoji}</div>
-                                <button className="text-gray-700 hover:text-white p-2 transition-colors"><MoreVertical className="h-5 w-5" /></button>
+                                <button
+                                    onClick={() => handleDeleteDeck(deck.id)}
+                                    className="text-gray-700 hover:text-red-500 p-2 transition-colors"
+                                    title="Excluir Deck"
+                                >
+                                    <Trash2 className="h-5 w-5" />
+                                </button>
                             </div>
 
                             <Link to={`/study/${deck.id}`} className="block group">
